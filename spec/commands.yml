@@ -1,0 +1,34 @@
+command_mixins:
+    fred_indicator:
+        class: FREDIndicatorMixin
+        parameters:
+            indicator_id:
+                parser: variable
+                type: str
+                optional: false
+                help: "FRED indicator ID"
+                value_label: ID
+                tags: [indicator]
+
+command_base:
+    fred:
+        mixins: [fred_indicator]
+        server_enabled: false
+        groups_allowed: [data-admin]
+
+command:
+    fred:
+        info:
+            base: fred
+            priority: 100
+            parse: indicator_id
+
+        revisions:
+            base: fred
+            priority: 110
+            parse: indicator_id
+
+        observations:
+            base: fred
+            priority: 120
+            parse: indicator_id

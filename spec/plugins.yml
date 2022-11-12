@@ -1,0 +1,31 @@
+plugin_mixins:
+    fred_indicator:
+        requirement:
+            indicator_ids:
+                type: list
+                help: "list of FRED indicator ids"
+
+    fred_series:
+        class: FREDSeriesMixin
+        mixins: [fred_indicator]
+        option:
+            start_date:
+                type: date
+                default: "1900-01-01"
+                help: "starting date to pull recent FRED indicator values (YYYY-MM-DD)"
+            date:
+                type: date
+                default: "1900-01-01"
+                help: "date to pull recent FRED indicator values (YYYY-MM-DD)"
+
+plugin:
+    source:
+        providers:
+            fred_indicator_info:
+                mixins: [fred_indicator]
+
+            fred_indicator_revisions:
+                mixins: [fred_series]
+
+            fred_indicator_observations:
+                mixins: [fred_series]
