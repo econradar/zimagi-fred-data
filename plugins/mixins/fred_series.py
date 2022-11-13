@@ -1,8 +1,8 @@
 from django.conf import settings
-from fredapi import Fred
 
 from systems.plugins.index import ProviderMixin
 from utility.data import ensure_list
+from utility.fred import FredAPI
 
 import datetime
 
@@ -10,7 +10,7 @@ import datetime
 class FREDSeriesMixin(ProviderMixin('fred_series')):
 
     def load_items(self, context):
-        self.fred = Fred(api_key = settings.FRED_API_KEY)
+        self.fred = FredAPI(api_key = settings.FRED_API_KEY)
 
         if not self.field_date or isinstance(self.field_date, str):
             date = self.field_date if self.field_date else self.field_start_date

@@ -1,11 +1,11 @@
 from django.conf import settings
-from fredapi import Fred
 
 from systems.commands.index import CommandMixin
+from utility.fred import FredAPI
 
 
 class FREDIndicatorMixin(CommandMixin('fred_indicator')):
 
     @property
     def fred(self):
-        return Fred(api_key = settings.FRED_API_KEY)
+        return FredAPI(api_key = settings.FRED_API_KEY)

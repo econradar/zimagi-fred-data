@@ -1,8 +1,8 @@
 from django.conf import settings
-from fredapi import Fred
 
 from systems.plugins.index import BaseProvider
 from utility.data import ensure_list
+from utility.fred import FredAPI
 
 
 class Provider(BaseProvider('source', 'fred_indicator_info')):
@@ -28,7 +28,7 @@ class Provider(BaseProvider('source', 'fred_indicator_info')):
         ]
 
     def load_items(self, context):
-        fred = Fred(api_key = settings.FRED_API_KEY)
+        fred = FredAPI(api_key = settings.FRED_API_KEY)
         for indicator_id in ensure_list(self.field_indicator_ids):
             self.command.info("Loading FRED indicator: {}".format(indicator_id))
             data = fred.get_series_info(indicator_id)
