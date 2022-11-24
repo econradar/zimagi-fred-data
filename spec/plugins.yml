@@ -1,9 +1,13 @@
 plugin_mixins:
     fred_indicator:
         requirement:
-            indicator_ids:
-                type: list
-                help: "list of FRED indicator ids"
+            category_id:
+                type: int
+                help: "FRED category id"
+            min_popularity:
+                type: int
+                default: 0
+                help: "Minimum FRED popularity score"
 
     fred_series:
         class: FREDSeriesMixin
@@ -21,7 +25,9 @@ plugin_mixins:
 plugin:
     source:
         providers:
-            fred_indicator_info:
+            fred_indicator_categories:
+
+            fred_indicator_series:
                 mixins: [fred_indicator]
 
             fred_indicator_revisions:
