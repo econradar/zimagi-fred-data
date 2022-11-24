@@ -43,7 +43,7 @@ class Provider(BaseProvider('source', 'fred_indicator_series')):
                     self.command.info("Loading FRED indicator: {}".format(indicator_id))
 
                     data = self._load_series_info(fred, indicator_id)
-                    if not data.empty:
+                    if data and not data.empty:
                         data = data.to_dict()
                         data['categories'] = self._load_series_categories(fred, indicator_id)
                         yield data
