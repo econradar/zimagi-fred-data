@@ -32,3 +32,7 @@ command:
             base: fred
             priority: 120
             parse: indicator_id
+
+        series:
+            base: fred
+            priority: 120
