@@ -14,11 +14,10 @@ class FREDSeriesMixin(ProviderMixin('fred_series')):
 
 
     def get_columns(self, *columns):
-        return [ 'source', 'series_id', *columns ]
+        return [ 'series_id', *columns ]
 
     def get_values(self, data, *columns):
         return [
-            settings.FRED_SOURCE_NAME,
             self.field_series_id,
             *[ data.get(column, None) for column in columns ]
         ]
