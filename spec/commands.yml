@@ -1,38 +1,144 @@
 command_mixins:
-    fred_indicator:
-        class: FREDIndicatorMixin
+    fred_series:
+        class: FREDSeriesMixin
         parameters:
-            indicator_id:
+            series_id:
                 parser: variable
                 type: str
                 optional: false
-                help: "FRED indicator ID"
+                help: "FRED series ID"
                 value_label: ID
-                tags: [indicator]
+                tags: [series]
+            api_params:
+                parser: fields
+                default: {}
+                optional: true
+                tags: [series]
+
+    fred_list:
+        class: FREDListMixin
+        parameters:
+            limit:
+                parser: variable
+                type: int
+                optional: "--limit"
+                default: 50
+                help: "Number of results to return"
+                value_label: NUM
+                tags: [series]
+            display_fields:
+                parser: variables
+                type: str
+                optional: "--fields"
+                help: "Specific fields to return from data series"
+                value_label: FIELD
+                tags: [series]
+            start_time:
+                parser: variable
+                type: str
+                optional: "--start"
+                default: "1800-01-01"
+                help: "FRED series start time"
+                value_label: "YYYY-MM-DD"
+                tags: [series]
+            end_time:
+                parser: variable
+                type: str
+                optional: "--end"
+                help: "FRED series end time"
+                value_label: "YYYY-MM-DD"
+                tags: [series]
 
 command_base:
     fred:
-        mixins: [fred_indicator]
+        mixins: [fred_series]
         server_enabled: false
         groups_allowed: [data-admin]
 
 command:
     fred:
-        info:
-            base: fred
+        series:
             priority: 100
-            parse: indicator_id
 
-        revisions:
-            base: fred
-            priority: 110
-            parse: indicator_id
+            info:
+                base: fred
+                priority: 100
+                parse: series_id
+
+            search:
+                base: fred
+                mixins: [fred_list]
+                priority: 110
+                parameters:
+                    search_text:
+                        parser: variable
+                        type: str
+                        optional: false
+                        help: "FRED series search text"
+                        value_label: TEXT
+                        tags: [series]
+                    search_type:
+                        parser: variable
+                        type: str
+                        optional: "--type"
+                        choices: [full_text, series_id]
+                        default: full_text
+                        help: "FRED series search type"
+                        value_label: TYPE
+                        tags: [series]
+                parse:
+                    - search_text
+                    - search_type
+                    - limit
+                    - display_fields
+                    - api_params
+
+            updates:
+                base: fred
+                mixins: [fred_list]
+                priority: 120
+                parameters:
+                    start_time:
+                        parser: variable
+                        type: str
+                        optional: "--start"
+                        help: "FRED series updated start time"
+                        value_label: "YYYYMMDDHHMM"
+                        tags: [series]
+                    end_time:
+                        parser: variable
+                        type: str
+                        optional: "--end"
+                        help: "FRED series updated end time"
+                        value_label: "YYYYMMDDHHMM"
+                        tags: [series]
+                parse:
+                    - start_time
+                    - end_time
+                    - limit
+                    - display_fields
+                    - api_params
 
         observations:
             base: fred
-            priority: 120
-            parse: indicator_id
+            mixins: [fred_list]
+            priority: 110
+            parse:
+                - series_id
+                - start_time
+                - end_time
+                - limit
+                - display_fields
+                - api_params
 
-        series:
+        revisions:
             base: fred
+            mixins: [fred_list]
             priority: 120
+            parse:
+                - series_id
+                - start_time
+                - end_time
+                - limit
+                - display_fields
+                - api_params
