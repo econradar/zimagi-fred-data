@@ -9,7 +9,7 @@ class Provider(BaseProvider('source', 'fred_observations')):
     def load_items(self, context):
         start_date = self.get_start_date()
 
-        self.command.info("Loading {} observations from {}".format(
+        self.command.info("Loading FRED series {} observations from {}".format(
             self.field_series_id,
             start_date
         ))
