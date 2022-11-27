@@ -4,6 +4,7 @@ from systems.plugins.index import BaseProvider
 class Provider(BaseProvider('source', 'fred_series')):
 
     category_columns = [
+        'id',
         'name',
         'parent_id',
         'notes'
@@ -33,7 +34,6 @@ class Provider(BaseProvider('source', 'fred_series')):
         }
 
     def load_items(self, context):
-        self.command.info("Loading FRED series {}".format(self.field_series_id))
         yield {
             'info': self.fred.get_series(self.field_series_id),
             'categories': list(self.fred.get_series_categories(self.field_series_id))
