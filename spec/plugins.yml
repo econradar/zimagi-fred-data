@@ -1,17 +1,14 @@
 plugin_mixins:
-    fred_indicator:
-        requirement:
-            category_id:
-                type: int
-                help: "FRED category id"
-            min_popularity:
-                type: int
-                default: 0
-                help: "Minimum FRED popularity score"
-
     fred_series:
         class: FREDSeriesMixin
-        mixins: [fred_indicator]
+        requirement:
+            series_id:
+                type: str
+                help: "FRED series id"
+
+    fred_data:
+        class: FREDDataMixin
+        mixins: [fred_series]
         option:
             start_date:
                 type: date
@@ -25,13 +22,11 @@ plugin_mixins:
 plugin:
     source:
         providers:
-            fred_indicator_categories:
-
-            fred_indicator_series:
-                mixins: [fred_indicator]
-
-            fred_indicator_revisions:
+            fred_series:
                 mixins: [fred_series]
 
-            fred_indicator_observations:
-                mixins: [fred_series]
+            fred_revisions:
+                mixins: [fred_data]
+
+            fred_observations:
+                mixins: [fred_data]
