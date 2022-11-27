@@ -60,6 +60,8 @@ class FredAPI(object):
             for category in data['categories']:
                 if category['parent_id']:
                     yield from self.get_category(category['parent_id'])
+
+                category['series'] = True
                 yield category
 
     def get_category_tree(self, series_id, **params):
