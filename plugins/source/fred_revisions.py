@@ -1,7 +1,7 @@
 from systems.plugins.index import BaseProvider
 
 
-class Provider(BaseProvider('source', 'fred_indicator_revisions')):
+class Provider(BaseProvider('source', 'fred_revisions')):
 
     def item_columns(self):
         return self.get_columns('date', 'target_date', 'value')
