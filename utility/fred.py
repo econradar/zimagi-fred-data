@@ -162,23 +162,31 @@ class FredAPI(object):
 
 
     def get_data_revisions(self, series_id, observation_start = None, observation_end = None, limit = None, **params):
+        current_time = self.time.now
+
         revision_limit = 1950 # Hard limit of 2000 vintage dates / request
         revision_dates = self.get_revision_dates(series_id,
             realtime_start = observation_start if observation_start else self.first_date,
-            realtime_end = observation_end if observation_end else self.time.now
+            realtime_end = observation_end if observation_end else current_time
         )
         for revision_sequence in [
             revision_dates[index:index + revision_limit] for index in range(0, len(revision_dates), revision_limit)
         ]:
+            start_date = self.time.to_datetime(revision_sequence[0])
+            end_date = self.time.to_datetime(revision_sequence[-1])
+
             for observation in self.get_data(series_id,
-                realtime_start = revision_sequence[0],
-                realtime_end = revision_sequence[-1],
+                realtime_start = self.first_date,
+                realtime_end = current_time,
+                observation_start = self.time.shift(start_date, -90),
+                observation_end = self.time.shift(end_date, 90),
                 limit = limit,
                 **params
             ):
-                yield observation
-                if limit:
-                    limit -= 1
+                if observation['realtime_start'] >= start_date and observation['realtime_start'] <= end_date:
+                    yield observation
+                    if limit:
+                        limit -= 1
 
             if limit == 0:
                 break
@@ -240,7 +248,8 @@ class FredAPI(object):
 
         for series in data[element]:
             for field in datetime_fields:
-                series[field] = self._parse_datetime(series[field])
+                if field in series:
+                    series[field] = self._parse_datetime(series[field])
             yield series
 
         if count == page_size and (not limit or count < limit):
