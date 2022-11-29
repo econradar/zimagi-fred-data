@@ -4,7 +4,7 @@ from systems.commands.index import CommandMixin
 class FREDListMixin(CommandMixin('fred_list')):
 
     def render_results(self, data_list):
-        columns = self.display_fields
+        columns = self.display_fields or []
         data = []
 
         for item in data_list:
