@@ -17,7 +17,7 @@ class FredAPIError(ValueError):
 class FredAPI(object):
 
     root_url = 'https://api.stlouisfed.org/fred'
-    first_date = '1776-07-04'
+    first_date = '1800-01-01'
 
 
     def __init__(self, command, api_key):
@@ -130,6 +130,17 @@ class FredAPI(object):
         yield from self._get_series_data('series/search', **params)
 
 
+    def get_revision_dates(self, series_id, **params):
+        params['series_id'] = series_id
+
+        self._normalize_sort_params(params, False, 'asc')
+        self._normalize_realtime_params(params)
+
+        return list(self._get_list_data('series/vintagedates', params, 'vintage_dates',
+            max_page_size = 10000
+        ))
+
+
     def get_data(self, series_id, observation_start = None, observation_end = None, limit = None, **params):
         params['series_id'] = series_id
         params['limit'] = limit
@@ -149,14 +160,28 @@ class FredAPI(object):
 
         yield from self._get_observation_data('series/observations', **params)
 
+
     def get_data_revisions(self, series_id, observation_start = None, observation_end = None, limit = None, **params):
-        yield from self.get_data(series_id,
-            observation_start = observation_start,
-            observation_end = observation_end,
+        revision_limit = 1950 # Hard limit of 2000 vintage dates / request
+        revision_dates = self.get_revision_dates(series_id,
             realtime_start = observation_start if observation_start else self.first_date,
-            limit = limit,
-            **params
+            realtime_end = observation_end if observation_end else self.time.now
         )
+        for revision_sequence in [
+            revision_dates[index:index + revision_limit] for index in range(0, len(revision_dates), revision_limit)
+        ]:
+            for observation in self.get_data(series_id,
+                realtime_start = revision_sequence[0],
+                realtime_end = revision_sequence[-1],
+                limit = limit,
+                **params
+            ):
+                yield observation
+                if limit:
+                    limit -= 1
+
+            if limit == 0:
+                break
 
 
     def _normalize_realtime_params(self, params):
