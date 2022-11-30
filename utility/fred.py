@@ -162,12 +162,16 @@ class FredAPI(object):
 
 
     def get_data_revisions(self, series_id, observation_start = None, observation_end = None, limit = None, **params):
-        current_time = self.time.now
+        observation_start = self.time.to_datetime(observation_start if observation_start else self.first_date).date()
+        observation_end = self.time.to_datetime(observation_end if observation_end else '9999-12-31').date()
+        limit = None if not limit else limit
 
-        revision_limit = 1950 # Hard limit of 2000 vintage dates / request
+        count = 0
+        revision_limit = 2000 # Hard limit of 2000 vintage dates / request
+
         revision_dates = self.get_revision_dates(series_id,
-            realtime_start = observation_start if observation_start else self.first_date,
-            realtime_end = observation_end if observation_end else current_time
+            realtime_start = self.first_date,
+            realtime_end = '9999-12-31'
         )
         for revision_sequence in [
             revision_dates[index:index + revision_limit] for index in range(0, len(revision_dates), revision_limit)
@@ -176,20 +180,21 @@ class FredAPI(object):
             end_date = self.time.to_datetime(revision_sequence[-1])
 
             for observation in self.get_data(series_id,
-                realtime_start = self.first_date,
-                realtime_end = current_time,
-                observation_start = self.time.shift(start_date, -90),
-                observation_end = self.time.shift(end_date, 90),
+                realtime_start = self.time.shift(start_date, -1 if count else 0, 'days'),
+                realtime_end = end_date,
                 limit = limit,
                 **params
             ):
-                if observation['realtime_start'] >= start_date and observation['realtime_start'] <= end_date:
+                realtime_start = self.time.to_datetime(observation['realtime_start'])
+
+                if realtime_start >= start_date and realtime_start >= observation_start and realtime_start <= observation_end:
                     yield observation
                     if limit:
                         limit -= 1
 
             if limit == 0:
                 break
+            count += 1
 
 
     def _normalize_realtime_params(self, params):
