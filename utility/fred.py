@@ -105,14 +105,16 @@ class FredAPI(object):
         self._normalize_realtime_params(params)
 
         if start_time:
-            if not isinstance(start_time, str):
+            if not isinstance(start_time, (str, int)):
                 start_time = start_time.strftime('%Y%m%d%H%M')
-            params['start_time'] = start_time
+            params['start_time'] = str(start_time)
 
         if end_time:
-            if not isinstance(end_time, str):
+            if not isinstance(end_time, (str, int)):
                 end_time = end_time.strftime('%Y%m%d%H%M')
-            params['end_time'] = end_time
+            params['end_time'] = str(end_time)
+        elif start_time:
+            params['end_time'] = self.time.shift(self.time.now, 1, 'days').strftime('%Y%m%d%H%M')
 
         yield from self._get_series_data('series/updates', **params)
 
@@ -218,19 +220,20 @@ class FredAPI(object):
 
     def _fetch_data(self, path, **params):
         params['file_type'] = 'json'
-        params['api_key'] = self.api_key
         data = None
 
-        url = "{}/{}?{}".format(
+        safe_url = "{}/{}?{}".format(
             self.root_url,
             path,
             "&".join([ "{}={}".format(key, value) for key, value in clean_dict(params).items() ]
         ))
+        url = "{}&api_key={}".format(safe_url, self.api_key)
 
         def load():
             nonlocal data
             try:
                 time.sleep(1)
+                logger.info("FRED request: {}".format(safe_url))
                 response = urllib.request.urlopen(url)
                 data = load_json(response.read())
 
