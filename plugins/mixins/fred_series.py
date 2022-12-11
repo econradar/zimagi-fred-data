@@ -2,9 +2,13 @@ from django.conf import settings
 
 from systems.plugins.index import ProviderMixin
 from utility.fred import FredAPI
+from utility.time import Time
 
 
 class FREDSeriesMixin(ProviderMixin('fred_series')):
+
+    time = Time()
+
 
     @property
     def fred(self):
