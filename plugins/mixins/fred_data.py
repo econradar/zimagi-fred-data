@@ -24,7 +24,7 @@ class FREDDataMixin(ProviderMixin('fred_data')):
 
 
     def get_series_updates(self, start_time):
-        if not isinstance(start_time, str):
+        if not isinstance(start_time, (str, int)):
             start_time = start_time.strftime('%Y%m%d%H%M')
 
         data = None
