@@ -2,6 +2,7 @@ from utility.data import load_json, get_identifier, clean_dict
 from utility.time import Time
 
 import urllib
+import re
 import pandas
 import time
 import logging
@@ -153,12 +154,12 @@ class FredAPI(object):
         if observation_start is not None:
             if not isinstance(observation_start, str):
                 observation_start = observation_start.strftime('%Y-%m-%d')
-            params['observation_start'] = observation_start
+            params['observation_start'] = re.match(r'^(\d{4}\-\d{2}\-\d{2})', observation_start).group(1)
 
         if observation_end is not None:
             if not isinstance(observation_end, str):
                 observation_end = observation_end.strftime('%Y-%m-%d')
-            params['observation_end'] = observation_end
+            params['observation_end'] = re.match(r'^(\d{4}\-\d{2}\-\d{2})', observation_end).group(1)
 
         yield from self._get_observation_data('series/observations', **params)
 
